@@ -3,16 +3,14 @@
 namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
-use App\Repository\CategoryRepository;
 use Gedmo\Mapping\Annotation as Gedmo;
-use Doctrine\Common\Collections\Collection;
-use Doctrine\Common\Collections\ArrayCollection;
+use App\Repository\SubcategoryRepository;
 use Gedmo\Timestampable\Traits\TimestampableEntity;
 use Gedmo\SoftDeleteable\Traits\SoftDeleteableEntity;
 
-#[ORM\Entity(repositoryClass: CategoryRepository::class)]
+#[ORM\Entity(repositoryClass: SubcategoryRepository::class)]
 #[Gedmo\SoftDeleteable(fieldName: 'deletedAt', timeAware: false, hardDelete: true)]
-class Category
+class Subcategory
 {
     use TimestampableEntity;
     use SoftDeleteableEntity;
@@ -31,21 +29,9 @@ class Category
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $icon = null;
 
-    /**
-     * @var Collection<int, Subcategory>
-     */
-    #[ORM\OneToMany(targetEntity: Subcategory::class, mappedBy: 'category')]
-    private Collection $subcategories;
-
-    public function __construct()
-    {
-        $this->subcategories = new ArrayCollection();
-    }
-
-    public function __toString(): string
-    {
-        return $this->name;
-    }
+    #[ORM\ManyToOne(inversedBy: 'subcategories')]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?Category $category = null;
 
     public function getId(): ?int
     {
@@ -88,32 +74,14 @@ class Category
         return $this;
     }
 
-    /**
-     * @return Collection<int, Subcategory>
-     */
-    public function getSubcategories(): Collection
+    public function getCategory(): ?Category
     {
-        return $this->subcategories;
+        return $this->category;
     }
 
-    public function addSubcategory(Subcategory $subcategory): static
+    public function setCategory(?Category $category): static
     {
-        if (!$this->subcategories->contains($subcategory)) {
-            $this->subcategories->add($subcategory);
-            $subcategory->setCategory($this);
-        }
-
-        return $this;
-    }
-
-    public function removeSubcategory(Subcategory $subcategory): static
-    {
-        if ($this->subcategories->removeElement($subcategory)) {
-            // set the owning side to null (unless already changed)
-            if ($subcategory->getCategory() === $this) {
-                $subcategory->setCategory(null);
-            }
-        }
+        $this->category = $category;
 
         return $this;
     }
