@@ -4,6 +4,7 @@ namespace App\Controller\Admin;
 
 use App\Entity\User;
 use App\Entity\Category;
+use App\Entity\Kakebo;
 use App\Entity\Subcategory;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -39,6 +40,9 @@ class DashboardController extends AbstractDashboardController
         yield MenuItem::subMenu('Gestion', 'fa fa-book')->setSubItems([
             MenuItem::linkToCrud('Catégories', 'fa fa-tags', Category::class),
             MenuItem::linkToCrud('Sous-catégories', 'fa fa-tag', Subcategory::class),
+        ]);
+        yield MenuItem::subMenu('Kakebo', 'fa fa-book')->setSubItems([
+            MenuItem::linkToCrud('Kakebos', 'fa fa-book', Kakebo::class),
         ]);
     }
 }

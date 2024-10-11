@@ -5,6 +5,8 @@ namespace App\Entity;
 use Doctrine\ORM\Mapping as ORM;
 use App\Repository\UserRepository;
 use Gedmo\Mapping\Annotation as Gedmo;
+use Doctrine\Common\Collections\Collection;
+use Doctrine\Common\Collections\ArrayCollection;
 use Gedmo\Timestampable\Traits\TimestampableEntity;
 use Gedmo\SoftDeleteable\Traits\SoftDeleteableEntity;
 use Symfony\Component\Security\Core\User\UserInterface;
@@ -17,7 +19,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
     use TimestampableEntity;
     use SoftDeleteableEntity;
-    
+
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
@@ -46,6 +48,22 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $picture = null;
+
+    /**
+     * @var Collection<int, Kakebo>
+     */
+    #[ORM\OneToMany(targetEntity: Kakebo::class, mappedBy: 'user', orphanRemoval: true)]
+    private Collection $kakebos;
+
+    public function __construct()
+    {
+        $this->kakebos = new ArrayCollection();
+    }
+
+    public function __toString()
+    {
+        return $this->getFirstname() . ' ' . $this->getLastname();
+    }
 
     public function getId(): ?int
     {
@@ -154,6 +172,36 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setPicture(?string $picture): static
     {
         $this->picture = $picture;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Kakebo>
+     */
+    public function getKakebos(): Collection
+    {
+        return $this->kakebos;
+    }
+
+    public function addKakebo(Kakebo $kakebo): static
+    {
+        if (!$this->kakebos->contains($kakebo)) {
+            $this->kakebos->add($kakebo);
+            $kakebo->setUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeKakebo(Kakebo $kakebo): static
+    {
+        if ($this->kakebos->removeElement($kakebo)) {
+            // set the owning side to null (unless already changed)
+            if ($kakebo->getUser() === $this) {
+                $kakebo->setUser(null);
+            }
+        }
 
         return $this;
     }
